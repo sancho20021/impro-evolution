@@ -1,4 +1,13 @@
 # impro-evolution
+## Tips to downloading and opening project
+Java 16 or newer Java version is required.
+
+If you are using Intellij IDEA, you can follow these steps to open this project on your computer:
+
+1. Clone the repository using [this link](https://github.com/sancho20021/impro-evolution.git)
+2. In Intellij IDEA, select File -> New -> Project from Existing Sources.
+Specify the path to the cloned repository. Choose *Import project from external model* -> Maven -> Finish
+   
 ## Usage instruction
 - You can start playing with impro-evolution music synthesizer by running [main class](https://github.com/sancho20021/impro-evolution/blob/main/src/main/java/examples/Main.java)
   - Type commands in standard input. All commands can be shown by typing *help*
