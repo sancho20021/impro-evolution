@@ -1,6 +1,7 @@
 package examples.manual;
 
 import com.jsyn.unitgen.*;
+import modules.UnitConstant;
 import org.junit.Test;
 
 import java.util.List;
@@ -30,5 +31,26 @@ public class FeedBackLoop {
         select.output.connect(out);
 
         Common.playSynth(List.of(sine, mul, square, saw, select), out);
+    }
+
+    @Test
+    public void test02() {
+        final var triangle = new TriangleOscillator();
+        final var out = new LineOut();
+        triangle.output.connect(out);
+        final var mul = new Multiply();
+        mul.inputA.set(300);
+        triangle.output.connect(mul.inputB);
+
+        final var latch = new Latch();
+        mul.output.connect(latch.input);
+        final var lfo = new SawtoothOscillator();
+        lfo.frequency.set(4);
+        lfo.output.connect(latch.gate);
+        latch.output.connect(triangle.frequency);
+
+        final var c = new UnitConstant(400);
+        c.output.connect(triangle.frequency);
+        Common.playSynth(List.of(triangle, mul, c, latch, lfo), out);
     }
 }
