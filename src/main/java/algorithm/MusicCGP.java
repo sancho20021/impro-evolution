@@ -6,6 +6,8 @@ import algorithm.formats.OneMelody;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -19,20 +21,26 @@ public class MusicCGP {
     private double seconds = 2;
     private final Logger logger;
 
-    public MusicCGP(
-            final MusicCircuit circuit,
-            final int lambda,
-            final double c
-    ) {
+    public MusicCGP(final MusicCircuit circuit, final int lambda, final double c) {
+        this(circuit, lambda, c, 0);
+    }
+
+    public MusicCGP(final MusicCircuit circuit, final int lambda, final double c, final double forwardCordsPr) {
         this.circuit = circuit;
         genomeOperations = new GenomeOperations(circuit, new Random(2));
+        genomeOperations.setForwardCordsPr(forwardCordsPr);
         this.lambda = lambda;
         this.c = c;
+
         logger = new Logger(circuit);
     }
 
     public MusicCGP(final MusicCircuit circuit) {
         this(circuit, 4, 2);
+    }
+
+    public void setForwardCordsPr(final double forwardCordsPr) {
+        genomeOperations.setForwardCordsPr(forwardCordsPr);
     }
 
     public void setMaxPopulations(final int n) {
@@ -80,6 +88,7 @@ public class MusicCGP {
                         "'stop' if you are finished with composing.\n" +
                         "'set m <number>' to change mutation rate (from 1 to +inf).\n" +
                         "'set time <number>' to change listening time.\n" +
+                        "'set f <number>' to change probability of forward cords (from 0 to 1)'.\n" +
                         "'current' to listen to current melody.\n" +
                         "'repeat' to listen to suggested melodies.\n" +
                         "'save' to save current melody.\n" +
@@ -104,8 +113,8 @@ public class MusicCGP {
             }
             announceMelodies(offspring);
 
-            int n = -1;
-            while (n == -1) {
+            AtomicInteger n = new AtomicInteger(-1);
+            while (n.get() == -1) {
                 final String input = scn.nextLine();
                 if (input.equals("help")) {
                     listCommands();
@@ -131,26 +140,42 @@ public class MusicCGP {
                     }
                 } else if (input.matches("set \\S+ \\S+")) {
                     final var words = input.split("\\s");
-                    if (words[1].equals("m")) {
-                        final var newC = computeData(words[2], Double::parseDouble, x -> x > 0, "Only doubles > 0 allowed for parameter 'm'");
-                        newC.ifPresent(m -> c = m);
-                        System.out.println("Mutation set to " + c);
-                    } else if (words[1].equals("time")) {
-                        final var newTime = computeData(words[2], Double::parseDouble, x -> x > 0, "Only doubles > 0 allowed for parameter 'time'");
-                        newTime.ifPresent(t -> seconds = t);
-                        System.out.println("Time set to " + seconds);
-                    } else {
-                        System.out.println("No such parameter '" + words[1] + "'");
+                    switch (words[1]) {
+                        case "m" -> computeData(
+                                words[2],
+                                Double::parseDouble,
+                                x -> x > 0,
+                                newC -> c = newC,
+                                "Only doubles > 0 allowed for parameter 'm'"
+                        ).ifPresent(newC -> System.out.println("Mutation set to " + c));
+                        case "time" -> computeData(
+                                words[2],
+                                Double::parseDouble,
+                                x -> x > 0,
+                                newTime -> seconds = newTime,
+                                "Only doubles > 0 allowed for parameter 'time'"
+                        ).ifPresent(newTime -> System.out.println("Time set to " + newTime));
+                        case "f" -> computeData(
+                                words[2],
+                                Double::parseDouble,
+                                x -> 0 <= x && x < 1,
+                                this::setForwardCordsPr,
+                                "f must be in [0, 1)"
+                        ).ifPresent(newF -> System.out.println("f set to " + newF));
+                        default -> System.out.println("No such parameter '" + words[1] + "'");
                     }
                 } else {
-                    final var melodyN = computeData(input, Integer::parseInt, x -> 0 <= x && x <= offspring.length, "Unrecognized command");
-                    if (melodyN.isPresent()) {
-                        n = melodyN.get();
-                    }
+                    computeData(
+                            input,
+                            Integer::parseInt,
+                            x -> 0 <= x && x <= offspring.length,
+                            n::set,
+                            "Unrecognized command"
+                    );
                 }
             }
-            if (n > 0) {
-                genome = offspring[n - 1];
+            if (n.get() > 0) {
+                genome = offspring[n.get() - 1];
                 circuit.applyGenome(genome);
                 logger.addGenome(genome);
             }
@@ -164,10 +189,17 @@ public class MusicCGP {
         return genome;
     }
 
-    private static <T> Optional<T> computeData(final String string, final Function<String, T> f, final Predicate<T> predicate, final String errorMessage) {
+    private static <T> Optional<T> computeData(
+            final String string,
+            final Function<String, T> f,
+            final Predicate<T> predicate,
+            final Consumer<T> computeFun,
+            final String errorMessage
+    ) {
         try {
             final T data = f.apply(string);
             if (predicate.test(data)) {
+                computeFun.accept(data);
                 return Optional.of(data);
             } else {
                 System.out.println(errorMessage);

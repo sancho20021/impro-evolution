@@ -88,6 +88,9 @@ public class Main {
     public static void evolveMusic() {
         final MusicCircuit circuit = new MusicCircuit(10, 2, 10, 2);
         final MusicCGP cgp = new MusicCGP(circuit, 4, 2.0);
+
+        cgp.setForwardCordsPr(0.05);
+
         cgp.setListeningTime(1.2);
         cgp.evolve();
     }

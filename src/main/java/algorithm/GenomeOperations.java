@@ -10,11 +10,20 @@ public class GenomeOperations {
     public final MusicCircuit circuit;
     public final Random random;
     public final int genesNumber;
+    private double forwardCordsPr = 0;  // Probability of cord going forward (for feedback loops)
+
 
     public GenomeOperations(final MusicCircuit circuit, final Random random) {
         this.circuit = circuit;
         this.random = random;
         genesNumber = circuit.getInputsN() + (circuit.maxArity + 1) * circuit.getModulesN() + 1;
+    }
+
+    public void setForwardCordsPr(final double forwardCordsPr) {
+        if (!(0 <= forwardCordsPr && forwardCordsPr < 1)) {
+            throw new IllegalArgumentException("forwardCordsPr must be in [0, 1)");
+        }
+        this.forwardCordsPr = forwardCordsPr;
     }
 
     public Genome generateGenome() {
@@ -36,10 +45,6 @@ public class GenomeOperations {
         output = inputs.length + modules.length - 1;
 
         return new Genome(inputs, modules, output);
-    }
-
-    public Genome mutate(final Genome genome, final int genesN) {
-        return mutate(genome, IntStream.range(0, genesN).map(i -> random.nextInt(genesNumber)).boxed().collect(Collectors.toList()));
     }
 
     private void mutate(final Genome genome, final int gene, final IntPair inputGenes, final IntPair moduleGenes) {
@@ -73,10 +78,14 @@ public class GenomeOperations {
     }
 
     private IntPair getModuleArgBounds(final int module) {
-        final int column = module / circuit.rows;
-        final int fromColumnN = (column >= circuit.l) ? (column - circuit.l) * circuit.rows + circuit.getInputsN() : 0;
-        final int toColumnN = circuit.getInputsN() + column * circuit.rows;
-        return new IntPair(fromColumnN, toColumnN);
+        if (!circuit.isLineOut(module) && random.nextDouble() >= forwardCordsPr) {
+            final int column = module / circuit.rows;
+            final int fromColumnN = (column >= circuit.l) ? (column - circuit.l) * circuit.rows + circuit.getInputsN() : 0;
+            final int toColumnN = circuit.getInputsN() + column * circuit.rows;
+            return new IntPair(fromColumnN, toColumnN);
+        } else {
+            return new IntPair(module + 1, circuit.getInputsN() + circuit.getModulesN());
+        }
     }
 
     static class IntPair {

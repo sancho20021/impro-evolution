@@ -31,4 +31,16 @@ public class PlaySaved {
     public void test04() {
         Modes.readCompositionAndPlay(getCompFile("1626966600266"), 2);
     }
+    @Test
+    public void test05() {
+        Modes.readCompositionAndPlay(getCompFile("firstFeedback"), 6);
+    }
+    @Test
+    public void test06() {
+        Modes.readCompositionAndPlay(getCompFile("40 modules"), 3);
+    }
+    @Test
+    public void test07() {
+        Modes.readCompositionAndPlay(getCompFile("1626986491562"), 2);
+    }
 }
