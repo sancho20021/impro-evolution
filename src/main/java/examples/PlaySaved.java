@@ -27,4 +27,8 @@ public class PlaySaved {
     public void test03_electro2() {
         Modes.readCompositionAndPlay(getCompFile("electro2"), 2);
     }
+    @Test
+    public void test04() {
+        Modes.readCompositionAndPlay(getCompFile("1626966600266"), 2);
+    }
 }

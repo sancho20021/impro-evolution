@@ -35,7 +35,9 @@ public class MusicCircuit {
             () -> new Modules.TunableFilterModule(new FilterLowPass()),  // 10
             () -> new Modules.TunableFilterModule(new FilterHighPass()),  // 11
             () -> new Modules.TunableFilterModule(new FilterBandPass()),  // 12
-            Modules.LatchModule::new  //                                     13
+            Modules.LatchModule::new,  //                                    13
+            () -> new Modules.BinaryOperator(new Minimum()),  //             14
+            () -> new Modules.BinaryOperator(new Maximum())  //              15
     );
 
     public MusicCircuit(final int inputsN, final int rows, final int columns, final int l, List<Supplier<Module>> availableModules) {
