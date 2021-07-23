@@ -1,0 +1,153 @@
+diff --git a/pom.xml b/pom.xml
+index 4ce33d8..5bc694c 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -16,8 +16,8 @@
+     </repositories>
+ 
+     <properties>
+-        <maven.compiler.source>16</maven.compiler.source>
+-        <maven.compiler.target>16</maven.compiler.target>
++        <maven.compiler.source>11</maven.compiler.source>
++        <maven.compiler.target>11</maven.compiler.target>
+     </properties>
+     <dependencies>
+         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+@@ -43,4 +43,4 @@
+ 
+     </dependencies>
+ 
+-</project>
+\ No newline at end of file
++</project>
+diff --git a/src/main/java/algorithm/MusicCGP.java b/src/main/java/algorithm/MusicCGP.java
+index 3cb8dee..3ab9113 100644
+--- a/src/main/java/algorithm/MusicCGP.java
++++ b/src/main/java/algorithm/MusicCGP.java
+@@ -141,28 +141,31 @@ public class MusicCGP {
+                 } else if (input.matches("set \\S+ \\S+")) {
+                     final var words = input.split("\\s");
+                     switch (words[1]) {
+-                        case "m" -> computeData(
++                        case "m": computeData(
+                                 words[2],
+                                 Double::parseDouble,
+                                 x -> x > 0,
+                                 newC -> c = newC,
+                                 "Only doubles > 0 allowed for parameter 'm'"
+                         ).ifPresent(newC -> System.out.println("Mutation set to " + c));
+-                        case "time" -> computeData(
++                        break;
++                        case "time": computeData(
+                                 words[2],
+                                 Double::parseDouble,
+                                 x -> x > 0,
+                                 newTime -> seconds = newTime,
+                                 "Only doubles > 0 allowed for parameter 'time'"
+                         ).ifPresent(newTime -> System.out.println("Time set to " + newTime));
+-                        case "f" -> computeData(
++                        break;
++                        case "f": computeData(
+                                 words[2],
+                                 Double::parseDouble,
+                                 x -> 0 <= x && x < 1,
+                                 this::setForwardCordsPr,
+                                 "f must be in [0, 1)"
+                         ).ifPresent(newF -> System.out.println("f set to " + newF));
+-                        default -> System.out.println("No such parameter '" + words[1] + "'");
++                        break;
++                        default: System.out.println("No such parameter '" + words[1] + "'");
+                     }
+                 } else {
+                     computeData(
+diff --git a/src/main/java/modules/Modules.java b/src/main/java/modules/Modules.java
+index 2f35796..0eb15be 100644
+--- a/src/main/java/modules/Modules.java
++++ b/src/main/java/modules/Modules.java
+@@ -26,11 +26,11 @@ public class Modules {
+ 
+         @Override
+         public UnitInputPort getInput(int i) {
+-            return switch (i) {
+-                case 0 -> oscillator.amplitude;
+-                case 1 -> oscillator.frequency;
+-                default -> throw invalidArgsNumberError(this, "Oscillator");
+-            };
++            switch (i) {
++                case 0: return oscillator.amplitude;
++                case 1: return oscillator.frequency;
++                default: throw invalidArgsNumberError(this, "Oscillator");
++            }
+         }
+ 
+         @Override
+@@ -58,11 +58,11 @@ public class Modules {
+ 
+         @Override
+         public UnitInputPort getInput(int i) {
+-            return switch (i) {
+-                case 0 -> operator.inputA;
+-                case 1 -> operator.inputB;
+-                default -> throw invalidArgsNumberError(this, "Binary operator");
+-            };
++            switch (i) {
++                case 0: return operator.inputA;
++                case 1: return operator.inputB;
++                default: throw invalidArgsNumberError(this, "Binary operator");
++            }
+         }
+ 
+         @Override
+@@ -218,12 +218,12 @@ public class Modules {
+ 
+         @Override
+         public UnitInputPort getInput(int port) {
+-            return switch (port) {
+-                case 0 -> select.select;
+-                case 1 -> select.inputA;
+-                case 2 -> select.inputB;
+-                default -> throw invalidArgsNumberError(this, "Select");
+-            };
++            switch (port) {
++                case 0: return select.select;
++                case 1: return select.inputA;
++                case 2: return select.inputB;
++                default: throw invalidArgsNumberError(this, "Select");
++            }
+         }
+ 
+         @Override
+@@ -251,11 +251,11 @@ public class Modules {
+ 
+         @Override
+         public UnitInputPort getInput(int port) {
+-            return switch (port) {
+-                case 0 -> filter.input;
+-                case 1 -> filter.frequency;
+-                default -> throw invalidArgsNumberError(this, "Tunable Filter");
+-            };
++            switch (port) {
++                case 0: return filter.input;
++                case 1: return filter.frequency;
++                default: throw invalidArgsNumberError(this, "Tunable Filter");
++            }
+         }
+ 
+         @Override
+@@ -283,11 +283,11 @@ public class Modules {
+ 
+         @Override
+         public UnitInputPort getInput(int port) {
+-            return switch (port) {
+-                case 0 -> latch.input;
+-                case 1 -> latch.gate;
+-                default -> throw invalidArgsNumberError(this, "Latch");
+-            };
++            switch (port) {
++                case 0: return latch.input;
++                case 1: return latch.gate;
++                default: throw invalidArgsNumberError(this, "Latch");
++            }
+         }
+ 
+         @Override

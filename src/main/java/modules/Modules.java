@@ -26,11 +26,11 @@ public class Modules {
 
         @Override
         public UnitInputPort getInput(int i) {
-            return switch (i) {
-                case 0 -> oscillator.amplitude;
-                case 1 -> oscillator.frequency;
-                default -> throw invalidArgsNumberError(this, "Oscillator");
-            };
+            switch (i) {
+                case 0: return oscillator.amplitude;
+                case 1: return oscillator.frequency;
+                default: throw invalidArgsNumberError(this, "Oscillator");
+            }
         }
 
         @Override
@@ -58,11 +58,11 @@ public class Modules {
 
         @Override
         public UnitInputPort getInput(int i) {
-            return switch (i) {
-                case 0 -> operator.inputA;
-                case 1 -> operator.inputB;
-                default -> throw invalidArgsNumberError(this, "Binary operator");
-            };
+            switch (i) {
+                case 0: return operator.inputA;
+                case 1: return operator.inputB;
+                default: throw invalidArgsNumberError(this, "Binary operator");
+            }
         }
 
         @Override
@@ -218,12 +218,12 @@ public class Modules {
 
         @Override
         public UnitInputPort getInput(int port) {
-            return switch (port) {
-                case 0 -> select.select;
-                case 1 -> select.inputA;
-                case 2 -> select.inputB;
-                default -> throw invalidArgsNumberError(this, "Select");
-            };
+            switch (port) {
+                case 0: return select.select;
+                case 1: return select.inputA;
+                case 2: return select.inputB;
+                default: throw invalidArgsNumberError(this, "Select");
+            }
         }
 
         @Override
@@ -251,11 +251,11 @@ public class Modules {
 
         @Override
         public UnitInputPort getInput(int port) {
-            return switch (port) {
-                case 0 -> filter.input;
-                case 1 -> filter.frequency;
-                default -> throw invalidArgsNumberError(this, "Tunable Filter");
-            };
+            switch (port) {
+                case 0: return filter.input;
+                case 1: return filter.frequency;
+                default: throw invalidArgsNumberError(this, "Tunable Filter");
+            }
         }
 
         @Override
@@ -283,11 +283,11 @@ public class Modules {
 
         @Override
         public UnitInputPort getInput(int port) {
-            return switch (port) {
-                case 0 -> latch.input;
-                case 1 -> latch.gate;
-                default -> throw invalidArgsNumberError(this, "Latch");
-            };
+            switch (port) {
+                case 0: return latch.input;
+                case 1: return latch.gate;
+                default: throw invalidArgsNumberError(this, "Latch");
+            }
         }
 
         @Override

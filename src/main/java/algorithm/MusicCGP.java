@@ -77,6 +77,13 @@ public class MusicCGP {
             cgp.play(genome);
         }
     }
+    public static void playMelody(final OneMelody melody, final double secondsToPlay) {
+        final var circuit = new MusicCircuit(melody.circuitInfo);
+        circuit.applyGenome(melody.genome);
+        final var cgp = new MusicCGP(circuit);
+        cgp.setListeningTime(secondsToPlay);
+        cgp.play(circuit.genome);
+    }
 
     public Genome evolve() {
         return evolve(genomeOperations.generateGenome());
@@ -141,28 +148,31 @@ public class MusicCGP {
                 } else if (input.matches("set \\S+ \\S+")) {
                     final var words = input.split("\\s");
                     switch (words[1]) {
-                        case "m" -> computeData(
+                        case "m": computeData(
                                 words[2],
                                 Double::parseDouble,
                                 x -> x > 0,
                                 newC -> c = newC,
                                 "Only doubles > 0 allowed for parameter 'm'"
                         ).ifPresent(newC -> System.out.println("Mutation set to " + c));
-                        case "time" -> computeData(
+                        break;
+                        case "time": computeData(
                                 words[2],
                                 Double::parseDouble,
                                 x -> x > 0,
                                 newTime -> seconds = newTime,
                                 "Only doubles > 0 allowed for parameter 'time'"
                         ).ifPresent(newTime -> System.out.println("Time set to " + newTime));
-                        case "f" -> computeData(
+                        break;
+                        case "f": computeData(
                                 words[2],
                                 Double::parseDouble,
                                 x -> 0 <= x && x < 1,
                                 this::setForwardCordsPr,
                                 "f must be in [0, 1)"
                         ).ifPresent(newF -> System.out.println("f set to " + newF));
-                        default -> System.out.println("No such parameter '" + words[1] + "'");
+                        break;
+                        default: System.out.println("No such parameter '" + words[1] + "'");
                     }
                 } else {
                     computeData(
