@@ -1,6 +1,6 @@
 # impro-evolution
 ## Tips to download and open project
-Java 16 or newer Java version is required.
+Java 11 or newer Java version is required.
 
 If you use Intellij IDEA, you can follow these steps to open this project on your computer:
 
