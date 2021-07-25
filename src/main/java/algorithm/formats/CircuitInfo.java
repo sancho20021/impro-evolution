@@ -16,4 +16,24 @@ public class CircuitInfo {
         this.l = l;
         this.maxArity = maxArity;
     }
+
+    public CircuitInfo(final int inputsN, final int rows, final int columns, final int l) {
+        this(inputsN, rows, columns, l, algorithm.alternative.MusicCircuit.getMaxArity());
+    }
+
+    public int getModulesN() {
+        return rows * columns;
+    }
+
+    public boolean isInput(final int n) {
+        return 0 <= n && n < inputsN;
+    }
+
+    public boolean isModule(final int n) {
+        return inputsN <= n && n - inputsN < getModulesN();
+    }
+
+    public boolean isLineOut(final int n) {
+        return n == inputsN + getModulesN();
+    }
 }
