@@ -14,15 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Logger {
-    private final MusicCircuit circuit;
     private final Composition composition;
     public static final Path dataDir = Path.of("src/main/resources/data");
     private Path directory;
     private final Gson gson;
 
-    public Logger(final MusicCircuit circuit) {
-        this.circuit = circuit;
-        this.composition = new Composition(circuit.getInputsN(), circuit.rows, circuit.columns, circuit.l, circuit.maxArity);
+    public Logger(final CircuitInfo circuitInfo) {
+        this.composition = new Composition(circuitInfo);
         this.gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
@@ -51,11 +49,10 @@ public class Logger {
     public void saveToFile() throws IOException {
         putString("long", gson.toJson(composition));
         final var circuitInfo = composition.getCircuitInfo();
-        final List<MusicCircuit.CompactCircuit> compactComposition = new ArrayList<>();
+        final List<MusicCircuit.Graph> graphs = new ArrayList<>();
         for (final Genome genome : composition.getGenomes()) {
-            circuit.applyGenome(genome);
-            compactComposition.add(MusicCircuit.CompactCircuit.fromMusicCircuit(circuit));
+            graphs.add(new MusicCircuit(circuitInfo, genome).getGraph());
         }
-        putString("short", gson.toJson(new CompactComposition(circuitInfo, compactComposition)));
+        putString("short", gson.toJson(new CompactComposition(circuitInfo, graphs)));
     }
 }

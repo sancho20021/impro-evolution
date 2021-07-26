@@ -1,5 +1,6 @@
 package algorithm.formats;
 
+import algorithm.CircuitInfo;
 import algorithm.Genome;
 
 public class OneMelody {

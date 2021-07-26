@@ -1,13 +1,9 @@
-package algorithm.formats;
+package algorithm;
 
 import algorithm.MusicCircuit;
 
 public class CircuitInfo {
     public final int inputsN, rows, columns, l, maxArity;
-
-    public CircuitInfo(final MusicCircuit circuit) {
-        this(circuit.getInputsN(), circuit.rows, circuit.columns, circuit.l, circuit.maxArity);
-    }
 
     public CircuitInfo(final int inputsN, final int rows, final int columns, final int l, final int maxArity) {
         this.inputsN = inputsN;
@@ -18,7 +14,7 @@ public class CircuitInfo {
     }
 
     public CircuitInfo(final int inputsN, final int rows, final int columns, final int l) {
-        this(inputsN, rows, columns, l, algorithm.alternative.MusicCircuit.getMaxArity());
+        this(inputsN, rows, columns, l, MusicCircuit.getMaxArity());
     }
 
     public int getModulesN() {
