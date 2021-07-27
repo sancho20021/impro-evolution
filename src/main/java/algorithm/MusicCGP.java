@@ -3,6 +3,7 @@ package algorithm;
 import algorithm.formats.Composition;
 import algorithm.formats.OneMelody;
 import com.jsyn.JSyn;
+import com.jsyn.Synthesizer;
 import com.jsyn.unitgen.LineOut;
 import com.jsyn.unitgen.Pan;
 import com.jsyn.unitgen.UnitGenerator;
@@ -26,6 +27,7 @@ public class MusicCGP {
     private final Logger logger;
     private MusicCircuit circuit;
     private int pannedTracksN;
+    private final Synthesizer synth;
 
     public MusicCGP(final CircuitInfo info, final int lambda, final double c) {
         this(info, lambda, c, 0);
@@ -39,6 +41,7 @@ public class MusicCGP {
         this.c = c;
         this.pannedTracksN = 1;
         logger = new Logger(circuitInfo);
+        synth = JSyn.createSynthesizer();
     }
 
     public MusicCGP(final CircuitInfo info) {
@@ -105,6 +108,7 @@ public class MusicCGP {
                         "'set m <number>' to change mutation rate (from 1 to +inf).\n" +
                         "'set time <number>' to change listening time.\n" +
                         "'set f <number>' to change probability of forward cords (from 0 to 1)'.\n" +
+                        "'set f <number>' to change number of simultaneously playing tracks.\n" +
                         "'current' to listen to current melody.\n" +
                         "'repeat' to listen to suggested melodies.\n" +
                         "'save' to save current melody.\n" +
@@ -186,6 +190,18 @@ public class MusicCGP {
                                         System.out.println("f set to " + newF);
                                     },
                                     "f must be in [0, 1)"
+                            );
+                            break;
+                        case "p":
+                            computeData(
+                                    words[2],
+                                    Integer::parseInt,
+                                    x -> x >= 1,
+                                    newP -> {
+                                        setPannedTracksN(newP);
+                                        System.out.println("p set to " + newP);
+                                    },
+                                    "p must be positive integer"
                             );
                             break;
                         default:
@@ -289,23 +305,25 @@ public class MusicCGP {
 
     private void playParallel(List<MusicCircuit> circuits) {
         final var out = new LineOut();
-        final List<Pan> pans = new ArrayList<>(circuits.size());
+        if (circuits.size() == 1) {
+            circuits.get(0).getOutput().connect(0, out.getInput(), 0);
+            circuits.get(0).getOutput().connect(0, out.getInput(), 1);
+            play(circuits, out, seconds);
+            return;
+        }
+        final List<UnitGenerator> units = new ArrayList<>(circuits);
         for (int i = 0; i < circuits.size(); i++) {
             final var pan = new Pan();
             circuits.get(i).getOutput().connect(pan.input);
             pan.pan.set(-1 + 2.0 / (circuits.size() - 1) * i);
             pan.output.connect(0, out.input, 0);
             pan.output.connect(1, out.input, 1);
-            pans.add(pan);
+            units.add(pan);
         }
-        final List<UnitGenerator> units = new ArrayList<>(circuits);
-        units.addAll(pans);
         play(units, out, seconds);
     }
 
-    // TODO Unit synthesisEngine already set exception when playing current multiple times
-    public static void play(final List<UnitGenerator> units, final LineOut out, final double secondsToPlay) {
-        final var synth = JSyn.createSynthesizer();
+    public void play(final List<? extends UnitGenerator> units, final LineOut out, final double secondsToPlay) {
         units.forEach(synth::add);
         synth.add(out);
         synth.start();

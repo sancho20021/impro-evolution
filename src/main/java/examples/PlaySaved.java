@@ -22,7 +22,7 @@ public class PlaySaved {
 
     @Test
     public void test01() {
-//        Modes.readCompositionAndPlay(getCompFile("1626895060651"), 2);
+        Modes.readCompositionAndPlay(getCompFile("1627388596932"), 4);
     }
 
 }

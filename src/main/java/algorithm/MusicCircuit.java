@@ -53,9 +53,10 @@ public class MusicCircuit extends Circuit implements UnitSource {
             add(module.getUnitGenerator());
             modules.put(node, module);
             final List<Integer> args = getArguments(node, module);
-            graph.modules.put(node, new ModuleNode(node, args));
             if (info.isInput(node)) {
                 graph.inputs.put(node, genome.inputs[node]);
+            } else {
+                graph.modules.put(node, new ModuleNode(genome.modules[node - info.inputsN][0], args));
             }
             args.stream().filter(arg -> !active[arg]).forEach(bfsQueue::add);
         }
@@ -104,16 +105,16 @@ public class MusicCircuit extends Circuit implements UnitSource {
 
 
     public static class ModuleNode {
-        private final int module;
+        private final int moduleType;
         private final List<Integer> arguments;
 
-        public ModuleNode(final int module, final List<Integer> arguments) {
-            this.module = module;
+        public ModuleNode(final int moduleType, final List<Integer> arguments) {
+            this.moduleType = moduleType;
             this.arguments = arguments;
         }
 
-        public int getModule() {
-            return module;
+        public int getModuleType() {
+            return moduleType;
         }
 
         public List<Integer> getArguments() {
