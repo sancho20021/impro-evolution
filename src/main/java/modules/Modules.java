@@ -5,6 +5,8 @@ import com.jsyn.ports.UnitOutputPort;
 import com.jsyn.unitgen.*;
 
 public class Modules {
+    private Modules() {
+    }
 
     public static class Oscillator implements Module {
         private final UnitOscillator oscillator;
@@ -27,9 +29,12 @@ public class Modules {
         @Override
         public UnitInputPort getInput(int i) {
             switch (i) {
-                case 0: return oscillator.amplitude;
-                case 1: return oscillator.frequency;
-                default: throw invalidArgsNumberError(this, "Oscillator");
+                case 0:
+                    return oscillator.amplitude;
+                case 1:
+                    return oscillator.frequency;
+                default:
+                    throw invalidArgsNumberError(this, "Oscillator");
             }
         }
 
@@ -59,9 +64,12 @@ public class Modules {
         @Override
         public UnitInputPort getInput(int i) {
             switch (i) {
-                case 0: return operator.inputA;
-                case 1: return operator.inputB;
-                default: throw invalidArgsNumberError(this, "Binary operator");
+                case 0:
+                    return operator.inputA;
+                case 1:
+                    return operator.inputB;
+                default:
+                    throw invalidArgsNumberError(this, "Binary operator");
             }
         }
 
@@ -169,6 +177,11 @@ public class Modules {
         public UnitGenerator getUnitGenerator() {
             return unitConstant;
         }
+
+        @Override
+        public String toString() {
+            return Double.toString(unitConstant.value);
+        }
     }
 
     public static class Two implements Module {
@@ -219,10 +232,14 @@ public class Modules {
         @Override
         public UnitInputPort getInput(int port) {
             switch (port) {
-                case 0: return select.select;
-                case 1: return select.inputA;
-                case 2: return select.inputB;
-                default: throw invalidArgsNumberError(this, "Select");
+                case 0:
+                    return select.select;
+                case 1:
+                    return select.inputA;
+                case 2:
+                    return select.inputB;
+                default:
+                    throw invalidArgsNumberError(this, "Select");
             }
         }
 
@@ -252,9 +269,12 @@ public class Modules {
         @Override
         public UnitInputPort getInput(int port) {
             switch (port) {
-                case 0: return filter.input;
-                case 1: return filter.frequency;
-                default: throw invalidArgsNumberError(this, "Tunable Filter");
+                case 0:
+                    return filter.input;
+                case 1:
+                    return filter.frequency;
+                default:
+                    throw invalidArgsNumberError(this, "Tunable Filter");
             }
         }
 
@@ -284,9 +304,12 @@ public class Modules {
         @Override
         public UnitInputPort getInput(int port) {
             switch (port) {
-                case 0: return latch.input;
-                case 1: return latch.gate;
-                default: throw invalidArgsNumberError(this, "Latch");
+                case 0:
+                    return latch.input;
+                case 1:
+                    return latch.gate;
+                default:
+                    throw invalidArgsNumberError(this, "Latch");
             }
         }
 
