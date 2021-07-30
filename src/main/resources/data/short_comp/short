@@ -1,0 +1,570 @@
+{
+  "circuitInfo": {
+    "inputsN": 10,
+    "rows": 4,
+    "columns": 8,
+    "l": 2,
+    "maxArity": 3
+  },
+  "graphs": [
+    {
+      "inputs": {
+        "0": 883.9309721154955,
+        "2": 374.0527474308701,
+        "7": 269.0217657999502,
+        "8": 327.3179492886942,
+        "9": 905.8518230967384
+      },
+      "modules": {
+        "10": {
+          "moduleType": 11,
+          "arguments": [
+            7,
+            9
+          ]
+        },
+        "11": {
+          "moduleType": 15,
+          "arguments": [
+            30,
+            16
+          ]
+        },
+        "14": {
+          "moduleType": 13,
+          "arguments": [
+            11,
+            7
+          ]
+        },
+        "15": {
+          "moduleType": 5,
+          "arguments": [
+            2,
+            0
+          ]
+        },
+        "16": {
+          "moduleType": 7,
+          "arguments": [
+            0,
+            0
+          ]
+        },
+        "17": {
+          "moduleType": 13,
+          "arguments": [
+            8,
+            2
+          ]
+        },
+        "18": {
+          "moduleType": 15,
+          "arguments": [
+            15,
+            14
+          ]
+        },
+        "20": {
+          "moduleType": 11,
+          "arguments": [
+            10,
+            10
+          ]
+        },
+        "22": {
+          "moduleType": 4,
+          "arguments": [
+            14,
+            15
+          ]
+        },
+        "23": {
+          "moduleType": 2,
+          "arguments": [
+            16,
+            15
+          ]
+        },
+        "24": {
+          "moduleType": 0,
+          "arguments": [
+            17,
+            17
+          ]
+        },
+        "25": {
+          "moduleType": 4,
+          "arguments": [
+            16,
+            20
+          ]
+        },
+        "26": {
+          "moduleType": 5,
+          "arguments": [
+            22,
+            25
+          ]
+        },
+        "28": {
+          "moduleType": 2,
+          "arguments": [
+            24,
+            18
+          ]
+        },
+        "29": {
+          "moduleType": 2,
+          "arguments": [
+            25,
+            22
+          ]
+        },
+        "30": {
+          "moduleType": 0,
+          "arguments": [
+            26,
+            26
+          ]
+        },
+        "31": {
+          "moduleType": 7,
+          "arguments": [
+            23,
+            22
+          ]
+        },
+        "32": {
+          "moduleType": 7,
+          "arguments": [
+            29,
+            28
+          ]
+        },
+        "37": {
+          "moduleType": 4,
+          "arguments": [
+            31,
+            28
+          ]
+        },
+        "41": {
+          "moduleType": 13,
+          "arguments": [
+            32,
+            37
+          ]
+        }
+      }
+    },
+    {
+      "inputs": {
+        "0": 883.9309721154955,
+        "2": 374.0527474308701,
+        "7": 269.0217657999502,
+        "8": 327.3179492886942
+      },
+      "modules": {
+        "11": {
+          "moduleType": 15,
+          "arguments": [
+            30,
+            16
+          ]
+        },
+        "14": {
+          "moduleType": 13,
+          "arguments": [
+            11,
+            7
+          ]
+        },
+        "15": {
+          "moduleType": 5,
+          "arguments": [
+            2,
+            0
+          ]
+        },
+        "16": {
+          "moduleType": 7,
+          "arguments": [
+            0,
+            0
+          ]
+        },
+        "17": {
+          "moduleType": 13,
+          "arguments": [
+            8,
+            2
+          ]
+        },
+        "18": {
+          "moduleType": 15,
+          "arguments": [
+            15,
+            14
+          ]
+        },
+        "22": {
+          "moduleType": 4,
+          "arguments": [
+            14,
+            15
+          ]
+        },
+        "23": {
+          "moduleType": 2,
+          "arguments": [
+            16,
+            15
+          ]
+        },
+        "24": {
+          "moduleType": 0,
+          "arguments": [
+            17,
+            17
+          ]
+        },
+        "25": {
+          "moduleType": 4,
+          "arguments": [
+            16,
+            15
+          ]
+        },
+        "26": {
+          "moduleType": 5,
+          "arguments": [
+            22,
+            25
+          ]
+        },
+        "28": {
+          "moduleType": 2,
+          "arguments": [
+            24,
+            18
+          ]
+        },
+        "29": {
+          "moduleType": 2,
+          "arguments": [
+            25,
+            22
+          ]
+        },
+        "30": {
+          "moduleType": 0,
+          "arguments": [
+            26,
+            26
+          ]
+        },
+        "31": {
+          "moduleType": 7,
+          "arguments": [
+            23,
+            22
+          ]
+        },
+        "32": {
+          "moduleType": 7,
+          "arguments": [
+            29,
+            28
+          ]
+        },
+        "37": {
+          "moduleType": 4,
+          "arguments": [
+            31,
+            28
+          ]
+        },
+        "41": {
+          "moduleType": 13,
+          "arguments": [
+            32,
+            37
+          ]
+        }
+      }
+    },
+    {
+      "inputs": {
+        "0": 883.9309721154955,
+        "2": 374.0527474308701,
+        "7": 269.0217657999502,
+        "8": 327.3179492886942
+      },
+      "modules": {
+        "11": {
+          "moduleType": 15,
+          "arguments": [
+            30,
+            16
+          ]
+        },
+        "14": {
+          "moduleType": 13,
+          "arguments": [
+            11,
+            7
+          ]
+        },
+        "15": {
+          "moduleType": 5,
+          "arguments": [
+            2,
+            0
+          ]
+        },
+        "16": {
+          "moduleType": 7,
+          "arguments": [
+            0,
+            0
+          ]
+        },
+        "17": {
+          "moduleType": 13,
+          "arguments": [
+            8,
+            2
+          ]
+        },
+        "18": {
+          "moduleType": 15,
+          "arguments": [
+            15,
+            14
+          ]
+        },
+        "22": {
+          "moduleType": 4,
+          "arguments": [
+            14,
+            15
+          ]
+        },
+        "23": {
+          "moduleType": 2,
+          "arguments": [
+            16,
+            15
+          ]
+        },
+        "24": {
+          "moduleType": 0,
+          "arguments": [
+            17,
+            17
+          ]
+        },
+        "25": {
+          "moduleType": 4,
+          "arguments": [
+            16,
+            15
+          ]
+        },
+        "26": {
+          "moduleType": 5,
+          "arguments": [
+            22,
+            25
+          ]
+        },
+        "28": {
+          "moduleType": 2,
+          "arguments": [
+            24,
+            18
+          ]
+        },
+        "29": {
+          "moduleType": 2,
+          "arguments": [
+            25,
+            22
+          ]
+        },
+        "30": {
+          "moduleType": 3,
+          "arguments": [
+            26,
+            26
+          ]
+        },
+        "31": {
+          "moduleType": 7,
+          "arguments": [
+            23,
+            22
+          ]
+        },
+        "32": {
+          "moduleType": 7,
+          "arguments": [
+            29,
+            28
+          ]
+        },
+        "37": {
+          "moduleType": 4,
+          "arguments": [
+            31,
+            28
+          ]
+        },
+        "41": {
+          "moduleType": 13,
+          "arguments": [
+            32,
+            37
+          ]
+        }
+      }
+    },
+    {
+      "inputs": {
+        "0": 883.9309721154955,
+        "2": 374.0527474308701,
+        "7": 269.0217657999502,
+        "8": 327.3179492886942
+      },
+      "modules": {
+        "11": {
+          "moduleType": 15,
+          "arguments": [
+            30,
+            16
+          ]
+        },
+        "14": {
+          "moduleType": 13,
+          "arguments": [
+            11,
+            7
+          ]
+        },
+        "15": {
+          "moduleType": 5,
+          "arguments": [
+            2,
+            0
+          ]
+        },
+        "16": {
+          "moduleType": 7,
+          "arguments": [
+            0,
+            2
+          ]
+        },
+        "17": {
+          "moduleType": 13,
+          "arguments": [
+            8,
+            2
+          ]
+        },
+        "18": {
+          "moduleType": 15,
+          "arguments": [
+            15,
+            14
+          ]
+        },
+        "22": {
+          "moduleType": 4,
+          "arguments": [
+            14,
+            15
+          ]
+        },
+        "23": {
+          "moduleType": 2,
+          "arguments": [
+            16,
+            15
+          ]
+        },
+        "24": {
+          "moduleType": 0,
+          "arguments": [
+            17,
+            17
+          ]
+        },
+        "25": {
+          "moduleType": 4,
+          "arguments": [
+            16,
+            15
+          ]
+        },
+        "26": {
+          "moduleType": 5,
+          "arguments": [
+            22,
+            25
+          ]
+        },
+        "28": {
+          "moduleType": 2,
+          "arguments": [
+            24,
+            18
+          ]
+        },
+        "29": {
+          "moduleType": 2,
+          "arguments": [
+            25,
+            22
+          ]
+        },
+        "30": {
+          "moduleType": 3,
+          "arguments": [
+            26,
+            26
+          ]
+        },
+        "31": {
+          "moduleType": 7,
+          "arguments": [
+            23,
+            22
+          ]
+        },
+        "32": {
+          "moduleType": 7,
+          "arguments": [
+            29,
+            28
+          ]
+        },
+        "37": {
+          "moduleType": 4,
+          "arguments": [
+            31,
+            28
+          ]
+        },
+        "41": {
+          "moduleType": 13,
+          "arguments": [
+            32,
+            37
+          ]
+        }
+      }
+    }
+  ]
+}

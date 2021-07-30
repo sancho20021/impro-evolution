@@ -1,19 +1,18 @@
 package examples.manual;
 
-import algorithm.Modes;
 import com.jsyn.JSyn;
 import com.jsyn.Synthesizer;
 import com.jsyn.ports.UnitOutputPort;
 import com.jsyn.unitgen.*;
 import com.jsyn.util.WaveRecorder;
-import examples.PlaySaved;
-import files.Constants;
 import modules.UnitConstant;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+
+import static examples.SaveOneMelodyWav.exportMelodyToWav;
 
 public class DBMeasuring {
     @Test
@@ -118,6 +117,7 @@ public class DBMeasuring {
         sine.output.connect(add.inputA);
         printDB(List.of(sine, add, lfo, param), add.output);
     }
+
     @Test
     public void test05_filtered_constant() throws Exception {
         final var synth = JSyn.createSynthesizer();
@@ -131,6 +131,7 @@ public class DBMeasuring {
 
         f(synth, filter.output, f1);
     }
+
     @Test
     public void test05_filter() throws Exception {
         final var synth = JSyn.createSynthesizer();
@@ -151,12 +152,14 @@ public class DBMeasuring {
 
         f(synth, filter2.output, f1);
     }
+
     @Test
-    public void different_waves_1() throws IOException {
-        Modes.saveToWav(Constants.dataDir.resolve("small").resolve("silent").toFile(), 4);
+    public void different_waves_1() {
+        exportMelodyToWav("small", "silent", 4);
     }
+
     @Test
-    public void different_waves_2() throws IOException{
-        Modes.saveToWav(Constants.dataDir.resolve("small").resolve("sounding").toFile(), 4);
+    public void different_waves_2() {
+        exportMelodyToWav("small", "sounding", 4);
     }
 }

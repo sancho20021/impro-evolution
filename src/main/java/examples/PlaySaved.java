@@ -1,40 +1,45 @@
 package examples;
 
-import algorithm.Modes;
-import com.jsyn.unitgen.FilterHighPass;
-import com.jsyn.unitgen.LineOut;
-import com.jsyn.unitgen.Maximum;
-import com.jsyn.unitgen.SineOscillator;
-import examples.manual.Common;
-import files.Constants;
-import modules.UnitConstant;
+import algorithm.MusicCGP;
+import files.Utils;
+import files.formats.Composition;
+import files.formats.OneMelody;
 import org.junit.Test;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.List;
+import java.io.IOException;
+
+import static files.Utils.getCompositionFile;
+import static files.Utils.readObject;
 
 public class PlaySaved {
 
-    public static File getCompFile(final String name) {
-        return Constants.dataDir.resolve(name).resolve("long").toFile();
+    public static void readCompositionAndPlay(final String name, final double secondsPerMelody) throws IOException{
+        MusicCGP.playComposition(readObject(getCompositionFile(name), Composition.class), secondsPerMelody);
     }
 
     @Test
-    public void test01() {
-        Modes.readCompositionAndPlay(getCompFile("1627388596932"), 4);
+    public void test01() throws IOException {
+        readCompositionAndPlay("1627388596932", 4);
     }
+
     @Test
-    public void test02_eliminating_silence() {
-        Modes.readCompositionAndPlay(getCompFile("1627508349389"), 4);
+    public void test02_eliminating_silence() throws IOException {
+        readCompositionAndPlay("good_example", 4);
     }
+
     @Test
-    public void test02_play_one() {
-        Modes.playMelody(Constants.dataDir.resolve("1627508349389").resolve("song").toFile(), 25);
+    public void test02_play_one() throws IOException {
+        MusicCGP.playMelody(Utils.readObject(Utils.dataDir.resolve("good_example").resolve("song").toFile(), OneMelody.class), 25);
     }
+
     @Test
-    public void test03_frying_potato() {
-        Modes.readCompositionAndPlay(getCompFile("frying potato"), 4);
+    public void test03_frying_potato() throws IOException {
+        readCompositionAndPlay("frying potato", 4);
+    }
+
+    @Test
+    public void test04_short_comp() throws IOException {
+        readCompositionAndPlay("short_comp", 2);
     }
 
 }

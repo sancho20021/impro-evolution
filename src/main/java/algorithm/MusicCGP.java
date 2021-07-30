@@ -115,7 +115,7 @@ public class MusicCGP {
                         "'set m <number>' to change mutation rate (from 1 to +inf).\n" +
                         "'set time <number>' to change listening time.\n" +
                         "'set f <number>' to change probability of forward cords (from 0 to 1)'.\n" +
-                        "'set f <number>' to change number of simultaneously playing tracks.\n" +
+                        "'set p <number>' to change number of simultaneously playing tracks.\n" +
                         "'current' to listen to current melody.\n" +
                         "'repeat' to listen to suggested melodies.\n" +
                         "'save' to save current melody.\n" +
@@ -370,7 +370,6 @@ public class MusicCGP {
         play(units, out, seconds);
     }
 
-    // TODO playing current multiple times leads to different sounds
     public void play(final List<? extends UnitGenerator> units, final LineOut out, final double secondsToPlay) {
         units.forEach(synth::add);
         synth.add(out);
