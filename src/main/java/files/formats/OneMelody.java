@@ -1,4 +1,4 @@
-package algorithm.formats;
+package files.formats;
 
 import algorithm.CircuitInfo;
 import algorithm.Genome;

@@ -1,0 +1,153 @@
+{
+  "inputs": {
+    "0": 0.7975932870805682,
+    "1": 0.07766708865141181,
+    "3": 0.49891545212470445,
+    "4": 739.2114080610992,
+    "5": 0.2892802472436746,
+    "6": 0.9473537558960287,
+    "7": 269.0217657999502,
+    "8": 0.8496876710215018,
+    "9": 905.8518230967384
+  },
+  "modules": {
+    "11": {
+      "moduleType": 0,
+      "arguments": [
+        5,
+        33
+      ]
+    },
+    "12": {
+      "moduleType": 14,
+      "arguments": [
+        3,
+        7
+      ]
+    },
+    "13": {
+      "moduleType": 15,
+      "arguments": [
+        0,
+        9
+      ]
+    },
+    "14": {
+      "moduleType": 13,
+      "arguments": [
+        11,
+        7
+      ]
+    },
+    "15": {
+      "moduleType": 12,
+      "arguments": [
+        4,
+        9
+      ]
+    },
+    "16": {
+      "moduleType": 10,
+      "arguments": [
+        13,
+        8
+      ]
+    },
+    "17": {
+      "moduleType": 11,
+      "arguments": [
+        6,
+        1
+      ]
+    },
+    "18": {
+      "moduleType": 3,
+      "arguments": [
+        14,
+        12
+      ]
+    },
+    "19": {
+      "moduleType": 11,
+      "arguments": [
+        15,
+        17
+      ]
+    },
+    "21": {
+      "moduleType": 0,
+      "arguments": [
+        16,
+        17
+      ]
+    },
+    "22": {
+      "moduleType": 15,
+      "arguments": [
+        15,
+        19
+      ]
+    },
+    "25": {
+      "moduleType": 8,
+      "arguments": [
+        21,
+        17,
+        18
+      ]
+    },
+    "26": {
+      "moduleType": 5,
+      "arguments": [
+        22,
+        25
+      ]
+    },
+    "28": {
+      "moduleType": 9,
+      "arguments": []
+    },
+    "29": {
+      "moduleType": 12,
+      "arguments": [
+        25,
+        21
+      ]
+    },
+    "30": {
+      "moduleType": 12,
+      "arguments": [
+        26,
+        26
+      ]
+    },
+    "32": {
+      "moduleType": 7,
+      "arguments": [
+        29,
+        30
+      ]
+    },
+    "33": {
+      "moduleType": 5,
+      "arguments": [
+        25,
+        22
+      ]
+    },
+    "37": {
+      "moduleType": 4,
+      "arguments": [
+        28,
+        28
+      ]
+    },
+    "41": {
+      "moduleType": 13,
+      "arguments": [
+        32,
+        37
+      ]
+    }
+  }
+}

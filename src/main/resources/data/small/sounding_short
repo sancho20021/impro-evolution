@@ -1,0 +1,71 @@
+{
+  "inputs": {
+    "0": 0.15651814925426866,
+    "1": 531.4898191258518
+  },
+  "modules": {
+    "2": {
+      "moduleType": 11,
+      "arguments": [
+        0,
+        0
+      ]
+    },
+    "3": {
+      "moduleType": 15,
+      "arguments": [
+        14,
+        16
+      ]
+    },
+    "4": {
+      "moduleType": 3,
+      "arguments": [
+        1,
+        1
+      ]
+    },
+    "5": {
+      "moduleType": 15,
+      "arguments": [
+        0,
+        1
+      ]
+    },
+    "12": {
+      "moduleType": 11,
+      "arguments": [
+        2,
+        2
+      ]
+    },
+    "14": {
+      "moduleType": 4,
+      "arguments": [
+        2,
+        3
+      ]
+    },
+    "15": {
+      "moduleType": 2,
+      "arguments": [
+        4,
+        3
+      ]
+    },
+    "16": {
+      "moduleType": 1,
+      "arguments": [
+        5,
+        5
+      ]
+    },
+    "25": {
+      "moduleType": 5,
+      "arguments": [
+        12,
+        15
+      ]
+    }
+  }
+}

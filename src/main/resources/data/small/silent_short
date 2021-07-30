@@ -1,0 +1,47 @@
+{
+  "inputs": {
+    "0": 0.04883998606969908,
+    "1": 531.4898191258518
+  },
+  "modules": {
+    "2": {
+      "moduleType": 11,
+      "arguments": [
+        0,
+        0
+      ]
+    },
+    "4": {
+      "moduleType": 9,
+      "arguments": []
+    },
+    "7": {
+      "moduleType": 5,
+      "arguments": [
+        1,
+        1
+      ]
+    },
+    "12": {
+      "moduleType": 11,
+      "arguments": [
+        2,
+        2
+      ]
+    },
+    "15": {
+      "moduleType": 2,
+      "arguments": [
+        4,
+        7
+      ]
+    },
+    "25": {
+      "moduleType": 5,
+      "arguments": [
+        12,
+        15
+      ]
+    }
+  }
+}

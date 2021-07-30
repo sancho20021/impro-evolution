@@ -1,9 +1,9 @@
 package algorithm;
 
-import algorithm.formats.CompactComposition;
-import algorithm.formats.Composition;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import files.formats.CompactComposition;
+import files.formats.Composition;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -29,6 +29,10 @@ public class Logger {
             directory = dataDir.resolve(Long.toString(System.currentTimeMillis()));
             Files.createDirectories(directory);
         }
+    }
+
+    public String getDirectoryName() {
+        return directory.toString();
     }
 
     public void addGenome(final Genome genome) {

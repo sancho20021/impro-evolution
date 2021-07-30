@@ -1,12 +1,10 @@
 package algorithm;
 
-import algorithm.formats.Composition;
-import algorithm.formats.OneMelody;
 import com.jsyn.JSyn;
 import com.jsyn.Synthesizer;
-import com.jsyn.unitgen.LineOut;
-import com.jsyn.unitgen.Pan;
-import com.jsyn.unitgen.UnitGenerator;
+import com.jsyn.unitgen.*;
+import files.formats.Composition;
+import files.formats.OneMelody;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,7 +23,7 @@ public class MusicCGP {
     private final Scanner scn = new Scanner(System.in);
     private double seconds = 2;
     private final Logger logger;
-    private MusicCircuit circuit;
+    private Genome genome;
     private int pannedTracksN;
     private final Synthesizer synth;
 
@@ -87,18 +85,27 @@ public class MusicCGP {
         final var cgp = new MusicCGP(composition.getCircuitInfo());
         cgp.setListeningTime(secondsPerMelody);
         for (final var genome : composition.getGenomes()) {
-            cgp.playParallel(List.of(new MusicCircuit(composition.getCircuitInfo(), genome)));
+            cgp.playParallel(List.of(genome));
         }
     }
 
     public static void playMelody(final OneMelody melody, final double secondsToPlay) {
         final var cgp = new MusicCGP(melody.circuitInfo);
         cgp.setListeningTime(secondsToPlay);
-        cgp.playParallel(List.of(new MusicCircuit(melody.circuitInfo, melody.genome)));
+        cgp.playParallel(List.of(melody.genome));
     }
 
     public Genome evolve() {
-        return evolve(genomeOperations.generateGenome());
+        return evolve(generateValidGenome());
+    }
+
+    private Genome generateValidGenome() {
+        while (true) {
+            final var genome = genomeOperations.generateGenome();
+            if (isValidGenome(genome)) {
+                return genome;
+            }
+        }
     }
 
     private void listCommands() {
@@ -116,9 +123,9 @@ public class MusicCGP {
         );
     }
 
-    public Genome evolve(Genome genome) {
+    public Genome evolve(final Genome startGenome) {
         listCommands();
-        circuit = new MusicCircuit(circuitInfo, genome);
+        genome = startGenome;
         logger.addGenome(genome);
         outer:
         for (int i = 0; i < maxPopulations; i++) {
@@ -137,17 +144,17 @@ public class MusicCGP {
                     break outer;
                 } else if (input.equals("current")) {
                     System.out.println("Playing current melody");
-                    playParallel(List.of(circuit));
+                    playParallel(List.of(this.genome));
                     System.out.println("Playing stopped. Type command");
                 } else if (input.equals("repeat")) {
                     System.out.println("Playing melodies one more time");
                     announceMelodies(offspring);
                 } else if (input.equals("save")) {
-                    System.out.println("Saving current melody to file " + circuit.genome.hashCode());
+                    System.out.println("Saving current melody to file " + this.genome.hashCode());
                     try {
                         logger.putObject(
-                                Integer.toString(circuit.genome.hashCode()),
-                                new OneMelody(circuitInfo, circuit.genome)
+                                Integer.toString(this.genome.hashCode()),
+                                new OneMelody(circuitInfo, this.genome)
                         );
                     } catch (final IOException e) {
                         System.err.println("Couldn't save melody: " + e.getMessage());
@@ -219,7 +226,6 @@ public class MusicCGP {
             }
             if (n.get() > 0) {
                 genome = offspring[n.get() - 1];
-                circuit = new MusicCircuit(circuitInfo, genome);
                 logger.addGenome(genome);
             }
         }
@@ -232,6 +238,7 @@ public class MusicCGP {
                 case "y":
                     try {
                         logger.saveToFile();
+                        System.out.println("Improvisation saved to " + logger.getDirectoryName() + " directory");
                     } catch (final IOException e) {
                         System.err.println("Couldn't save composition: " + e.getMessage());
                         e.printStackTrace();
@@ -278,32 +285,72 @@ public class MusicCGP {
     }
 
     private boolean isValidGenome(final Genome genome) {
-        return true;
+        final var synth = JSyn.createSynthesizer();
+        synth.setRealTime(false);
+
+        final var circuit = new MusicCircuit(circuitInfo, genome);
+        synth.add(circuit);
+        final var hi = new FilterHighPass();
+        synth.add(hi);
+        final var lo = new FilterLowPass();
+        synth.add(lo);
+
+        circuit.output.connect(hi.input);
+        hi.frequency.set(20);
+        hi.output.connect(lo.input);
+        lo.frequency.set(20_000);
+
+        final var peakFollower = new PeakFollower();
+        synth.add(peakFollower);
+        lo.output.connect(peakFollower.input);
+
+        synth.start(20000);
+
+        final double step = peakFollower.halfLife.get();
+        double averageAmp = 0;
+        int n = 0;
+        peakFollower.start();
+        for (double i = 0; i < seconds; i += step) {
+            try {
+                synth.sleepFor(step);
+            } catch (final InterruptedException e) {
+                System.err.println("Music genome loudness check failed: " + e.getMessage());
+                return true;
+            }
+            averageAmp += (peakFollower.output.get() - averageAmp) / (n + 1);  // A_{n+1} = A_n + (x_{n+1} - A_n)/(n+1)
+            n++;
+        }
+
+        synth.stop();
+
+        final double db = com.softsynth.math.AudioMath.amplitudeToDecibels(averageAmp);
+        return db > -40;
     }
 
     private List<Integer> getDifferentActiveNodes(final Genome other) {
         final List<Integer> diff = new ArrayList<>();
-        for (final var module : circuit.getModules().entrySet()) {
+        for (final var module : new MusicCircuit(circuitInfo, genome).getModules().entrySet()) {
             final int index = module.getKey();
-            if (circuitInfo.isInput(index) && circuit.genome.inputs[index] != other.inputs[index]) {
+            if (circuitInfo.isInput(index) && genome.inputs[index] != other.inputs[index]) {
                 diff.add(index);
             } else if (circuitInfo.isModule(index)) {
                 final int moduleIndex = index - circuitInfo.inputsN;
                 final int argsNumber = module.getValue().getArguments().size();
                 for (int i = 0; i <= argsNumber; i++) {
-                    if (circuit.genome.modules[moduleIndex][i] != other.modules[moduleIndex][i]) {
+                    if (genome.modules[moduleIndex][i] != other.modules[moduleIndex][i]) {
                         diff.add(index);
                     }
                 }
             }
         }
-        if (circuit.genome.output != other.output) {
-            diff.add(circuit.genome.inputs.length + circuit.genome.modules.length);
+        if (genome.output != other.output) {
+            diff.add(genome.inputs.length + genome.modules.length);
         }
         return diff;
     }
 
-    private void playParallel(List<MusicCircuit> circuits) {
+    private void playParallel(List<Genome> genomes) {
+        final var circuits = genomes.stream().map(g -> new MusicCircuit(circuitInfo, g)).collect(Collectors.toList());
         final var out = new LineOut();
         if (circuits.size() == 1) {
             circuits.get(0).getOutput().connect(0, out.getInput(), 0);
@@ -323,6 +370,7 @@ public class MusicCGP {
         play(units, out, seconds);
     }
 
+    // TODO playing current multiple times leads to different sounds
     public void play(final List<? extends UnitGenerator> units, final LineOut out, final double secondsToPlay) {
         units.forEach(synth::add);
         synth.add(out);
@@ -341,11 +389,11 @@ public class MusicCGP {
 
     private void announceMelodies(final Genome[] genomes) {
         System.out.println("You will hear " + lambda + " different melodies. Choose the most favourite");
-        final var instruments = Arrays.stream(genomes).map(gen -> new MusicCircuit(circuitInfo, gen)).collect(Collectors.toList());
+        final var genomesList = Arrays.stream(genomes).collect(Collectors.toList());
         for (int groupI = 0; groupI < (genomes.length + pannedTracksN - 1) / pannedTracksN; groupI++) {
-            final int from = groupI * pannedTracksN, to = Math.min(instruments.size(), (groupI + 1) * pannedTracksN);
+            final int from = groupI * pannedTracksN, to = Math.min(genomesList.size(), (groupI + 1) * pannedTracksN);
             System.out.println("Melodies " + (from + 1) + "..." + to + " playing...");
-            playParallel(instruments.subList(from, to));
+            playParallel(genomesList.subList(from, to));
             System.out.println("Melodies playing finished");
         }
     }
