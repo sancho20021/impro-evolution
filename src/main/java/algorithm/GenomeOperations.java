@@ -26,6 +26,10 @@ public class GenomeOperations {
         this.forwardCordsPr = forwardCordsPr;
     }
 
+    public double getForwardCordsPr() {
+        return forwardCordsPr;
+    }
+
     public Genome generateGenome() {
         final double[] inputs = new double[circuitInfo.inputsN];
         final int[][] modules = new int[circuitInfo.getModulesN()][circuitInfo.maxArity + 1];

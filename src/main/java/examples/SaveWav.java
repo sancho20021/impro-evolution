@@ -15,7 +15,7 @@ public class SaveWav {
             System.out.println("Wav file saved to " + wavFile);
             return true;
         } catch (final IOException e) {
-            System.out.println("Exporting wav failed due to I/O error: " + e.getMessage());
+            System.err.println("Exporting wav failed due to I/O error: " + e.getMessage());
             return false;
         }
     }

@@ -2,6 +2,7 @@ package algorithm;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import files.Utils;
 import files.formats.CompactComposition;
 import files.formats.Composition;
 
@@ -13,9 +14,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import static files.Utils.dataDir;
+
 public class Logger {
     private final Composition composition;
-    public static final Path dataDir = Path.of("src/main/resources/data");
     private Path directory;
     private final Gson gson;
 
@@ -33,6 +35,9 @@ public class Logger {
 
     public String getDirectoryName() {
         return directory.toString();
+    }
+    public Path getDirectory() {
+        return directory;
     }
 
     public void addGenome(final Genome genome) {
@@ -58,5 +63,9 @@ public class Logger {
             graphs.add(new MusicCircuit(circuitInfo, genome).getGraph());
         }
         putString("short", gson.toJson(new CompactComposition(circuitInfo, graphs)));
+    }
+
+    public Composition getComposition() {
+        return composition;
     }
 }

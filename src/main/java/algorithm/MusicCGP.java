@@ -3,22 +3,25 @@ package algorithm;
 import com.jsyn.JSyn;
 import com.jsyn.Synthesizer;
 import com.jsyn.unitgen.*;
+import examples.SaveWav;
 import files.formats.Composition;
 import files.formats.OneMelody;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class MusicCGP {
     private final CircuitInfo circuitInfo;
     private final GenomeOperations genomeOperations;
     public final int lambda;
-    public double c; // c. Pr of mutation for each gene is c / number of genes
+    public double mu; // mu. Pr of mutation for each gene is mu / number of genes
     private int maxPopulations = Integer.MAX_VALUE;
     private final Scanner scn = new Scanner(System.in);
     private double seconds = 2;
@@ -27,16 +30,17 @@ public class MusicCGP {
     private int pannedTracksN;
     private final Synthesizer synth;
 
-    public MusicCGP(final CircuitInfo info, final int lambda, final double c) {
-        this(info, lambda, c, 0);
+
+    public MusicCGP(final CircuitInfo info, final int lambda, final double mu) {
+        this(info, lambda, mu, 0);
     }
 
-    public MusicCGP(final CircuitInfo info, final int lambda, final double c, final double forwardCordsPr) {
+    public MusicCGP(final CircuitInfo info, final int lambda, final double mu, final double forwardCordsPr) {
         this.circuitInfo = info;
         genomeOperations = new GenomeOperations(circuitInfo, new Random(2));
         genomeOperations.setForwardCordsPr(forwardCordsPr);
         this.lambda = lambda;
-        this.c = c;
+        this.mu = mu;
         this.pannedTracksN = 1;
         logger = new Logger(circuitInfo);
         synth = JSyn.createSynthesizer();
@@ -116,9 +120,11 @@ public class MusicCGP {
                         "'set time <number>' to change listening time.\n" +
                         "'set f <number>' to change probability of forward cords (from 0 to 1)'.\n" +
                         "'set p <number>' to change number of simultaneously playing tracks.\n" +
+                        "'get <parameter>' to see current parameter value.\n" +
                         "'current' to listen to current melody.\n" +
                         "'repeat' to listen to suggested melodies.\n" +
                         "'save' to save current melody.\n" +
+                        "'play' to play current composition from start to end. Each melody will be played for <time> seconds.\n" +
                         "number from 1 to " + lambda + " to choose favourite melody or '0' if you don't like them"
         );
     }
@@ -127,6 +133,12 @@ public class MusicCGP {
         listCommands();
         genome = startGenome;
         logger.addGenome(genome);
+        final Map<String, Supplier<? extends Number>> param_getters = Map.of(
+                "m", () -> mu,
+                "time", () -> seconds,
+                "f", genomeOperations::getForwardCordsPr,
+                "p", () -> pannedTracksN
+        );
         outer:
         for (int i = 0; i < maxPopulations; i++) {
             final var offspring = new Genome[lambda];
@@ -150,16 +162,31 @@ public class MusicCGP {
                     System.out.println("Playing melodies one more time");
                     announceMelodies(offspring);
                 } else if (input.equals("save")) {
-                    System.out.println("Saving current melody to file " + this.genome.hashCode());
+                    final String name = Integer.toString(genome.hashCode());
+                    System.out.println("Saving current melody to file " + name);
                     try {
                         logger.putObject(
-                                Integer.toString(this.genome.hashCode()),
+                                name,
                                 new OneMelody(circuitInfo, this.genome)
                         );
+                        if (askYN("Do you want to export it to wav?")) {
+                            final File wavFile = logger.getDirectory().resolve(name + ".wav").toFile();
+                            final var comp = new Composition(circuitInfo, List.of(genome));
+                            SaveWav.saveToWav(wavFile, comp, seconds);
+                        } else {
+                            System.out.println("Ok. Enter a command");
+                        }
                     } catch (final IOException e) {
                         System.err.println("Couldn't save melody: " + e.getMessage());
-                        e.printStackTrace();
                     }
+                } else if (input.equals("play")) {
+                    final Composition composition = logger.getComposition();
+                    System.out.println(
+                            "Playing current composition. It will be played for " +
+                                    +composition.getGenomes().size() * seconds + " seconds."
+                    );
+                    playComposition(composition, seconds);
+                    System.out.println("Playing finished.");
                 } else if (input.matches("set \\S+ \\S+")) {
                     final var words = input.split("\\s");
                     switch (words[1]) {
@@ -169,8 +196,8 @@ public class MusicCGP {
                                     Double::parseDouble,
                                     x -> x > 0,
                                     newC -> {
-                                        c = newC;
-                                        System.out.println("Mutation set to " + c);
+                                        mu = newC;
+                                        System.out.println("Mutation set to " + mu);
                                     },
                                     "Only doubles > 0 allowed for parameter 'm'"
                             );
@@ -214,6 +241,13 @@ public class MusicCGP {
                         default:
                             System.out.println("No such parameter '" + words[1] + "'");
                     }
+                } else if (input.matches("get \\S+")) {
+                    final var words = input.split("\\s");
+                    if (param_getters.containsKey(words[1])) {
+                        System.out.println(words[1] + " = " + param_getters.get(words[1]).get());
+                    } else {
+                        System.out.println("No such parameter '" + words[1] + "'");
+                    }
                 } else {
                     computeData(
                             input,
@@ -230,26 +264,22 @@ public class MusicCGP {
             }
         }
 
-        System.out.println("Do you want to save your improvisation? Type 'y' if yes, 'n' otherwise");
-        boolean isEnd = false;
-        while (!isEnd) {
-            final String s = scn.nextLine();
-            switch (s) {
-                case "y":
-                    try {
-                        logger.saveToFile();
-                        System.out.println("Improvisation saved to " + logger.getDirectoryName() + " directory");
-                    } catch (final IOException e) {
-                        System.err.println("Couldn't save composition: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                    isEnd = true;
-                    break;
-                case "n":
-                    isEnd = true;
-                    break;
-                default:
-                    System.out.println("Enter a correct option");
+        if (askYN("Do you want to save your improvisation?")) {
+            try {
+                logger.saveToFile();
+                System.out.println("Improvisation saved to " + logger.getDirectoryName() + " directory");
+            } catch (final IOException e) {
+                System.err.println("Couldn't save composition: " + e.getMessage());
+            }
+            if (askYN("Do you want to export your improvisation to wav?")) {
+                try {
+                    logger.ensureDirectoryExists();
+                    final var comp = logger.getComposition();
+                    final var wavFile = logger.getDirectory().resolve("improvisation.wav").toFile();
+                    SaveWav.saveToWav(wavFile, comp, seconds);
+                } catch (final IOException e) {
+                    System.err.println("Couldn't export to wav: " + e.getMessage());
+                }
             }
         }
         return genome;
@@ -276,7 +306,7 @@ public class MusicCGP {
 
     private Genome getNextMutant(final Genome genome) {
         while (true) {
-            final var nextGenome = genomeOperations.mutate(genome, c / genomeOperations.genesNumber);
+            final var nextGenome = genomeOperations.mutate(genome, mu / genomeOperations.genesNumber);
             final var diff = getDifferentActiveNodes(nextGenome);
             if (!diff.isEmpty() && isValidGenome(nextGenome)) {
                 return nextGenome;
@@ -394,6 +424,22 @@ public class MusicCGP {
             System.out.println("Melodies " + (from + 1) + "..." + to + " playing...");
             playParallel(genomesList.subList(from, to));
             System.out.println("Melodies playing finished");
+        }
+    }
+
+    private boolean askYN(final String message) {
+        System.out.println(message);
+        System.out.println("Type 'y' if yes, 'n' otherwise");
+        while (true) {
+            final String s = scn.nextLine();
+            switch (s) {
+                case "y":
+                    return true;
+                case "n":
+                    return false;
+                default:
+                    System.out.println("Enter a correct option");
+            }
         }
     }
 
