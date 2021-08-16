@@ -1,4 +1,4 @@
-package modules;
+package cgpmodules;
 
 import com.jsyn.ports.UnitOutputPort;
 import com.jsyn.unitgen.UnitGenerator;

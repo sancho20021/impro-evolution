@@ -1,11 +1,14 @@
 package examples.manual;
 
+import algorithm.MusicCircuit;
+import cgpmodules.UnitConstant;
 import com.jsyn.JSyn;
 import com.jsyn.Synthesizer;
 import com.jsyn.ports.UnitOutputPort;
 import com.jsyn.unitgen.*;
 import com.jsyn.util.WaveRecorder;
-import modules.UnitConstant;
+import files.Utils;
+import files.formats.Composition;
 import org.junit.Test;
 
 import java.io.File;
@@ -161,5 +164,45 @@ public class DBMeasuring {
     @Test
     public void different_waves_2() {
         exportMelodyToWav("small", "sounding", 4);
+    }
+
+    @Test
+    public void measureAmp() throws IOException {
+        final var seconds = 2;
+        final var comp = Utils.readObject(Utils.getCompositionFile("good_example"), Composition.class);
+        for (final var genome : comp.getGenomes()) {
+            final var circuit = new MusicCircuit(comp.getCircuitInfo(), genome);
+
+            final var synth = JSyn.createSynthesizer();
+//            synth.setRealTime(false);
+
+            final var out = new LineOut();
+            synth.add(out);
+
+            synth.add(circuit);
+            final var peakFollower = new PeakFollower();
+            synth.add(peakFollower);
+            circuit.getOutput().connect(peakFollower.input);
+            circuit.getOutput().connect(out);
+
+            synth.start(20000);
+            out.start();
+
+            final double step = peakFollower.halfLife.get();
+            double averageAmp = 0;
+            int n = 0;
+            peakFollower.start();
+            for (double i = 0; i < seconds; i += step) {
+                try {
+                    synth.sleepFor(step);
+                } catch (final InterruptedException e) {
+                    System.err.println("Music genome loudness check failed: " + e.getMessage());
+                }
+                averageAmp += (peakFollower.output.get() - averageAmp) / (n + 1);  // A_{n+1} = A_n + (x_{n+1} - A_n)/(n+1)
+                n++;
+            }
+            synth.stop();
+            System.out.println(averageAmp);
+        }
     }
 }

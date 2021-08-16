@@ -1,9 +1,11 @@
 package algorithm;
 
+import cgpmodules.Module;
+import cgpmodules.PitchQuantizer;
+import cgpmodules.Quantizer;
+import cgpmodules.modules.*;
 import com.jsyn.ports.UnitOutputPort;
 import com.jsyn.unitgen.*;
-import modules.Module;
-import modules.Modules;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -11,23 +13,25 @@ import java.util.stream.Collectors;
 
 public class MusicCircuit extends Circuit implements UnitSource {
     public final static List<Supplier<Module>> MODULES = List.of(
-            () -> new Modules.Oscillator(new SineOscillator()),  //     0
-            () -> new Modules.Oscillator(new TriangleOscillator()),  // 1
-            () -> new Modules.Oscillator(new SawtoothOscillator()),  // 2
-            () -> new Modules.Oscillator(new SquareOscillator()),  //   3
-            () -> new Modules.BinaryOperator(new Add()),  //            4
-            () -> new Modules.BinaryOperator(new Subtract()),  //       5
-            () -> new Modules.BinaryOperator(new Multiply()),  //       6
-            () -> new Modules.BinaryOperator(new Divide()),  //         7
-//            modules.Modules.PowerOfTwoModule::new,
-            Modules.SelectModule::new,  //                              8
-            Modules.Two::new,  //                                       9
-            () -> new Modules.TunableFilterModule(new FilterLowPass()),  // 10
-            () -> new Modules.TunableFilterModule(new FilterHighPass()),  // 11
-            () -> new Modules.TunableFilterModule(new FilterBandPass()),  // 12
-            Modules.LatchModule::new,  //                                    13
-            () -> new Modules.BinaryOperator(new Minimum()),  //             14
-            () -> new Modules.BinaryOperator(new Maximum())  //              15
+            () -> new Oscillator(new SineOscillator()),  //      0
+            () -> new Oscillator(new TriangleOscillator()),  //  1
+            () -> new Oscillator(new SawtoothOscillator()),  //  2
+            () -> new Oscillator(new SquareOscillator()),  //    3
+            () -> new BinaryOperatorM(new Add()),  //            4
+            () -> new BinaryOperatorM(new Subtract()),  //       5
+            () -> new BinaryOperatorM(new Multiply()),  //       6
+            () -> new BinaryOperatorM(new Divide()),  //         7
+//            PowerOfTwoM::new,
+            SelectM::new,  //                                    8
+            () -> new TunableFilterM(new FilterLowPass()),  //   9
+            () -> new TunableFilterM(new FilterHighPass()),  // 10
+            () -> new TunableFilterM(new FilterBandPass()),  // 11
+            LatchM::new,  //                                    12
+            () -> new BinaryOperatorM(new Minimum()),  //       13
+            () -> new BinaryOperatorM(new Maximum()),  //       14
+            SineOscPhaseModulated::new,                //       15
+            () -> new QuantizerM(PitchQuantizer.getMinorStandard()), // 16
+            () -> new QuantizerM(new Quantizer.ToNaturalQuantizer()) // 17
     );
     protected final UnitOutputPort output;
     private final CircuitInfo info;
@@ -48,7 +52,7 @@ public class MusicCircuit extends Circuit implements UnitSource {
             }
             active[node] = true;
             final var module = info.isInput(node)
-                    ? new Modules.Constant(genome.inputs[node])
+                    ? new Constant(genome.inputs[node])
                     : MODULES.get(genome.modules[node - info.inputsN][0]).get();
             add(module.getUnitGenerator());
             modules.put(node, module);

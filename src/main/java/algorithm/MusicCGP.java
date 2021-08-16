@@ -305,9 +305,10 @@ public class MusicCGP {
     }
 
     private Genome getNextMutant(final Genome genome) {
+        final var currentCircuit = new MusicCircuit(circuitInfo, genome);
         while (true) {
             final var nextGenome = genomeOperations.mutate(genome, mu / genomeOperations.genesNumber);
-            final var diff = getDifferentActiveNodes(nextGenome);
+            final var diff = getDifferentActiveNodes(currentCircuit, nextGenome);
             if (!diff.isEmpty() && isValidGenome(nextGenome)) {
                 return nextGenome;
             }
@@ -345,6 +346,7 @@ public class MusicCGP {
                 synth.sleepFor(step);
             } catch (final InterruptedException e) {
                 System.err.println("Music genome loudness check failed: " + e.getMessage());
+                Thread.currentThread().interrupt();
                 return true;
             }
             averageAmp += (peakFollower.output.get() - averageAmp) / (n + 1);  // A_{n+1} = A_n + (x_{n+1} - A_n)/(n+1)
@@ -354,12 +356,12 @@ public class MusicCGP {
         synth.stop();
 
         final double db = com.softsynth.math.AudioMath.amplitudeToDecibels(averageAmp);
-        return db > -40;
+        return db > -20;
     }
 
-    private List<Integer> getDifferentActiveNodes(final Genome other) {
+    private List<Integer> getDifferentActiveNodes(final MusicCircuit currentCircuit, final Genome other) {
         final List<Integer> diff = new ArrayList<>();
-        for (final var module : new MusicCircuit(circuitInfo, genome).getModules().entrySet()) {
+        for (final var module : currentCircuit.getModules().entrySet()) {
             final int index = module.getKey();
             if (circuitInfo.isInput(index) && genome.inputs[index] != other.inputs[index]) {
                 diff.add(index);

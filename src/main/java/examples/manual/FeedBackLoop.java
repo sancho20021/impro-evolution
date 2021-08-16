@@ -1,7 +1,7 @@
 package examples.manual;
 
 import com.jsyn.unitgen.*;
-import modules.UnitConstant;
+import cgpmodules.UnitConstant;
 import org.junit.Test;
 
 import java.util.List;

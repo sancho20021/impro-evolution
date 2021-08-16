@@ -6,7 +6,7 @@ import algorithm.CircuitInfo;
 public class Main {
 
     public static void evolveMusic() {
-        final var circuitInfo = new CircuitInfo(10, 5, 8, 2);
+        final var circuitInfo = new CircuitInfo(4, 6, 5, 1);
         final var cgp = new MusicCGP(circuitInfo);
         cgp.setForwardCordsPr(0.1);
         cgp.setPannedTracksN(2);
