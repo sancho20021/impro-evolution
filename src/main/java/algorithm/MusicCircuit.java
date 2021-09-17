@@ -103,11 +103,6 @@ public class MusicCircuit extends Circuit implements UnitSource {
         return graph;
     }
 
-    public Map<Integer, ModuleNode> getModules() {
-        return graph.modules;
-    }
-
-
     public static class ModuleNode {
         private final int moduleType;
         private final List<Integer> arguments;

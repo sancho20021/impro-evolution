@@ -11,9 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -21,14 +19,17 @@ public class MusicCGP {
     private final CircuitInfo circuitInfo;
     private final GenomeOperations genomeOperations;
     public final int lambda;
-    public double mu; // mu. Pr of mutation for each gene is mu / number of genes
     private int maxPopulations = Integer.MAX_VALUE;
     private final Scanner scn = new Scanner(System.in);
+
     private double seconds = 2;
     private final Logger logger;
     private Genome genome;
     private int pannedTracksN;
     private final Synthesizer synth;
+
+    private static final DoubleRange TIME_RANGE = new DoubleRange(0, Double.MAX_VALUE, false, true);
+    private static final IntRange PAN_RANGE = new IntRange(1, Integer.MAX_VALUE, true, true);
 
 
     public MusicCGP(final CircuitInfo info, final int lambda, final double mu) {
@@ -38,9 +39,9 @@ public class MusicCGP {
     public MusicCGP(final CircuitInfo info, final int lambda, final double mu, final double forwardCordsPr) {
         this.circuitInfo = info;
         genomeOperations = new GenomeOperations(circuitInfo, new Random(2));
-        genomeOperations.setForwardCordsPr(forwardCordsPr);
+        genomeOperations.setF(forwardCordsPr);
         this.lambda = lambda;
-        this.mu = mu;
+        genomeOperations.setC(mu);
         this.pannedTracksN = 1;
         logger = new Logger(circuitInfo);
         synth = JSyn.createSynthesizer();
@@ -50,15 +51,25 @@ public class MusicCGP {
         this(info, 4, 2);
     }
 
-    public void setPannedTracksN(final int n) {
-        if (n < 1) {
-            throw new IllegalArgumentException("Expected positive number");
-        }
-        pannedTracksN = n;
+    public boolean setForwardCordsPr(final double x) {
+        return genomeOperations.setF(x);
     }
 
-    public void setForwardCordsPr(final double forwardCordsPr) {
-        genomeOperations.setForwardCordsPr(forwardCordsPr);
+    public boolean setSeconds(final double seconds) {
+        if (TIME_RANGE.isInSet(seconds)) {
+            this.seconds = seconds;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean setPannedTracksN(final int n) {
+        if (PAN_RANGE.isInSet(n)) {
+            pannedTracksN = n;
+            return true;
+        }
+        return false;
     }
 
     public void setMaxPopulations(final int n) {
@@ -120,6 +131,7 @@ public class MusicCGP {
                         "'set time <number>' to change listening time.\n" +
                         "'set f <number>' to change probability of forward cords (from 0 to 1)'.\n" +
                         "'set p <number>' to change number of simultaneously playing tracks.\n" +
+                        "'set d <number>' to change real mutations to int mutations proportion.\n" +
                         "'get <parameter>' to see current parameter value.\n" +
                         "'current' to listen to current melody.\n" +
                         "'repeat' to listen to suggested melodies.\n" +
@@ -134,10 +146,11 @@ public class MusicCGP {
         genome = startGenome;
         logger.addGenome(genome);
         final Map<String, Supplier<? extends Number>> param_getters = Map.of(
-                "m", () -> mu,
+                "m", genomeOperations::getC,
                 "time", () -> seconds,
-                "f", genomeOperations::getForwardCordsPr,
-                "p", () -> pannedTracksN
+                "f", genomeOperations::getF,
+                "p", () -> pannedTracksN,
+                "d", genomeOperations::getD
         );
         outer:
         for (int i = 0; i < maxPopulations; i++) {
@@ -147,8 +160,8 @@ public class MusicCGP {
             }
             announceMelodies(offspring);
 
-            AtomicInteger n = new AtomicInteger(-1);
-            while (n.get() == -1) {
+            AtomicInteger trackNumber = new AtomicInteger(-1);
+            while (trackNumber.get() == -1) {
                 final String input = scn.nextLine();
                 if (input.equals("help")) {
                     listCommands();
@@ -191,52 +204,19 @@ public class MusicCGP {
                     final var words = input.split("\\s");
                     switch (words[1]) {
                         case "m":
-                            computeData(
-                                    words[2],
-                                    Double::parseDouble,
-                                    x -> x > 0,
-                                    newC -> {
-                                        mu = newC;
-                                        System.out.println("Mutation set to " + mu);
-                                    },
-                                    "Only doubles > 0 allowed for parameter 'm'"
-                            );
+                            tryToSetParameter("mutation", words[2], Double::parseDouble, genomeOperations::setC, genomeOperations.getCRange());
                             break;
                         case "time":
-                            computeData(
-                                    words[2],
-                                    Double::parseDouble,
-                                    x -> x > 0,
-                                    newTime -> {
-                                        seconds = newTime;
-                                        System.out.println("Time set to " + newTime);
-                                    },
-                                    "Only doubles > 0 allowed for parameter 'time'"
-                            );
+                            tryToSetParameter("time", words[2], Double::parseDouble, this::setSeconds, TIME_RANGE);
                             break;
                         case "f":
-                            computeData(
-                                    words[2],
-                                    Double::parseDouble,
-                                    x -> 0 <= x && x < 1,
-                                    newF -> {
-                                        setForwardCordsPr(newF);
-                                        System.out.println("f set to " + newF);
-                                    },
-                                    "f must be in [0, 1)"
-                            );
+                            tryToSetParameter("f", words[2], Double::parseDouble, genomeOperations::setF, genomeOperations.getFRange());
                             break;
                         case "p":
-                            computeData(
-                                    words[2],
-                                    Integer::parseInt,
-                                    x -> x >= 1,
-                                    newP -> {
-                                        setPannedTracksN(newP);
-                                        System.out.println("p set to " + newP);
-                                    },
-                                    "p must be positive integer"
-                            );
+                            tryToSetParameter("panned tracks number", words[2], Integer::parseInt, this::setPannedTracksN, PAN_RANGE);
+                            break;
+                        case "d":
+                            tryToSetParameter("d", words[2], Double::parseDouble, genomeOperations::setD, genomeOperations.getDRange());
                             break;
                         default:
                             System.out.println("No such parameter '" + words[1] + "'");
@@ -249,17 +229,20 @@ public class MusicCGP {
                         System.out.println("No such parameter '" + words[1] + "'");
                     }
                 } else {
-                    computeData(
-                            input,
-                            Integer::parseInt,
-                            x -> 0 <= x && x <= offspring.length,
-                            n::set,
-                            "Unrecognized command"
-                    );
+                    try {
+                        final int x = Integer.parseInt(input);
+                        if (0 <= x && x <= offspring.length) {
+                            trackNumber.set(x);
+                        } else {
+                            System.out.println("Unrecognized command");
+                        }
+                    } catch (final NumberFormatException e) {
+                        System.out.println("Unrecognized command");
+                    }
                 }
             }
-            if (n.get() > 0) {
-                genome = offspring[n.get() - 1];
+            if (trackNumber.get() > 0) {
+                genome = offspring[trackNumber.get() - 1];
                 logger.addGenome(genome);
             }
         }
@@ -285,29 +268,29 @@ public class MusicCGP {
         return genome;
     }
 
-    private static <T> void computeData(
-            final String string,
+    private <T> void tryToSetParameter(
+            final String parameterName,
+            final String s,
             final Function<String, T> f,
-            final Predicate<T> predicate,
-            final Consumer<T> computeFun,
-            final String errorMessage
+            final Function<T, Boolean> setter,
+            final MathSet<T> set
     ) {
         try {
-            final T data = f.apply(string);
-            if (predicate.test(data)) {
-                computeFun.accept(data);
+            final T t = f.apply(s);
+            if (setter.apply(t)) {
+                System.out.println(parameterName + " set to " + t);
             } else {
-                System.out.println(errorMessage);
+                System.out.println("Parameter " + parameterName + " must be in " + set);
             }
         } catch (final RuntimeException e) {
-            System.out.println(errorMessage);
+            System.out.println("Parameter " + parameterName + " must be in " + set);
         }
     }
 
     private Genome getNextMutant(final Genome genome) {
         final var currentCircuit = new MusicCircuit(circuitInfo, genome);
         while (true) {
-            final var nextGenome = genomeOperations.mutate(genome, mu / genomeOperations.genesNumber);
+            final var nextGenome = genomeOperations.mutate(genome);
             final var diff = getDifferentActiveNodes(currentCircuit, nextGenome);
             if (!diff.isEmpty() && isValidGenome(nextGenome)) {
                 return nextGenome;
@@ -361,18 +344,19 @@ public class MusicCGP {
 
     private List<Integer> getDifferentActiveNodes(final MusicCircuit currentCircuit, final Genome other) {
         final List<Integer> diff = new ArrayList<>();
-        for (final var module : currentCircuit.getModules().entrySet()) {
+        for (final var module : currentCircuit.getGraph().modules.entrySet()) {
             final int index = module.getKey();
+            final int moduleIndex = index - circuitInfo.inputsN;
+            final int argsNumber = module.getValue().getArguments().size();
+            for (int i = 0; i <= argsNumber; i++) {
+                if (genome.modules[moduleIndex][i] != other.modules[moduleIndex][i]) {
+                    diff.add(index);
+                }
+            }
+        }
+        for (final var index : currentCircuit.getGraph().inputs.keySet()) {
             if (circuitInfo.isInput(index) && genome.inputs[index] != other.inputs[index]) {
                 diff.add(index);
-            } else if (circuitInfo.isModule(index)) {
-                final int moduleIndex = index - circuitInfo.inputsN;
-                final int argsNumber = module.getValue().getArguments().size();
-                for (int i = 0; i <= argsNumber; i++) {
-                    if (genome.modules[moduleIndex][i] != other.modules[moduleIndex][i]) {
-                        diff.add(index);
-                    }
-                }
             }
         }
         if (genome.output != other.output) {

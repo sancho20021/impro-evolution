@@ -166,43 +166,68 @@ public class DBMeasuring {
         exportMelodyToWav("small", "sounding", 4);
     }
 
+    private static double getAveragePeak(final int intervals, final MusicCircuit circuit, final double seconds) {
+        final var synth = JSyn.createSynthesizer();
+        synth.setRealTime(false);
+
+        synth.add(circuit);
+        final var peakFollower = new PeakFollower();
+        synth.add(peakFollower);
+        circuit.getOutput().connect(peakFollower.input);
+
+        synth.start(20000);
+
+        final double step = seconds / intervals;
+        double averageAmp = 0;
+        int n = 0;
+        peakFollower.start();
+        for (double i = 0; i < seconds; i += step) {
+            try {
+                synth.sleepFor(step);
+            } catch (final InterruptedException e) {
+                System.err.println("Music genome loudness check failed: " + e.getMessage());
+                Thread.currentThread().interrupt();
+            }
+            averageAmp += (peakFollower.output.get() - averageAmp) / (n + 1);  // A_{n+1} = A_n + (x_{n+1} - A_n)/(n+1)
+            n++;
+        }
+        synth.stop();
+        return averageAmp;
+    }
+
+    private static void play(final List<UnitGenerator> units, final UnitOutputPort out, final double secs) {
+        final var synth = JSyn.createSynthesizer();
+        units.forEach(synth::add);
+        final var lineOut = new LineOut();
+        out.connect(0, lineOut.getInput(), 0);
+        out.connect(0, lineOut.getInput(), 1);
+        synth.add(lineOut);
+        synth.start();
+        lineOut.start();
+        try {
+            synth.sleepFor(secs);
+        } catch (final InterruptedException e) {
+            e.printStackTrace();
+        }
+        synth.stop();
+    }
+
     @Test
     public void measureAmp() throws IOException {
         final var seconds = 2;
         final var comp = Utils.readObject(Utils.getCompositionFile("good_example"), Composition.class);
         for (final var genome : comp.getGenomes()) {
-            final var circuit = new MusicCircuit(comp.getCircuitInfo(), genome);
+            final double amp = getAveragePeak(10, new MusicCircuit(comp.getCircuitInfo(), genome), 2);
+            System.out.println(amp);
 
-            final var synth = JSyn.createSynthesizer();
-//            synth.setRealTime(false);
+            final var c1 = new MusicCircuit(comp.getCircuitInfo(), genome);
+            play(List.of(c1), c1.getOutput(), seconds);
 
-            final var out = new LineOut();
-            synth.add(out);
-
-            synth.add(circuit);
-            final var peakFollower = new PeakFollower();
-            synth.add(peakFollower);
-            circuit.getOutput().connect(peakFollower.input);
-            circuit.getOutput().connect(out);
-
-            synth.start(20000);
-            out.start();
-
-            final double step = peakFollower.halfLife.get();
-            double averageAmp = 0;
-            int n = 0;
-            peakFollower.start();
-            for (double i = 0; i < seconds; i += step) {
-                try {
-                    synth.sleepFor(step);
-                } catch (final InterruptedException e) {
-                    System.err.println("Music genome loudness check failed: " + e.getMessage());
-                }
-                averageAmp += (peakFollower.output.get() - averageAmp) / (n + 1);  // A_{n+1} = A_n + (x_{n+1} - A_n)/(n+1)
-                n++;
-            }
-            synth.stop();
-            System.out.println(averageAmp);
+            final var c2 = new MusicCircuit(comp.getCircuitInfo(), genome);
+            final var div = new Divide();
+            c2.getOutput().connect(div.inputA);
+            div.inputB.set(amp);
+            play(List.of(c2, div), div.output, seconds);
         }
     }
 }
